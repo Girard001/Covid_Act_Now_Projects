@@ -16,7 +16,7 @@ ggplot(pop.IR, aes(population, IR)) +
    geom_smooth(method = "loess", se = FALSE) +
    geom_smooth(method = "lm", se = FALSE, color = "green") +
    geom_hline(yintercept = 1, color = "red") +
-   annotate("text", label = "As of 12/4/21", x = 3e+07, y = 1.4, size = 4, color = "grey60") +
+   annotate("text", label = "Point-in-time, as of 12/4/21", x = 2e+07, y = 1.4, size = 4, color = "grey60") +
    annotate("text", label = "(Excludes N. Mariana Is. / IR = 1.69)", x = 2e+07, y = 0.75, size = 3, color = "grey60") +
   theme_classic()
 ```
@@ -47,6 +47,38 @@ ggplot(pop.CR, aes(population, CR)) +
    geom_smooth(method = "loess", se = FALSE) +
    geom_smooth(method = "lm", se = FALSE, color = "green") +
    annotate("text", label = "As of 12/4/21", x = 3e+07, y = 0.3, size = 4, color = "grey60") +
+   annotate("text", label = "(Excludes N. Mariana Is. / pop = 54k)", x = 2e+07, y = 0, size = 3, color = "grey60") +
+   theme_classic()
+```
+
+---  
+  
+# 3rd Analysis - Population & Death Rate
+```{r}
+library(tidyverse)
+library(ggpmisc)
+options(scipen = 10000)
+pop.DR <- current_by_state %>%
+  select(state, population, actuals.deaths) %>%
+  mutate(DR = actuals.deaths / population)
+# boxplot of DR
+DR_temp <- arrange(pop.DR, desc(DR))
+DR_temq <- DR_temp[-(1:52),c(1, 4)]
+ggplot(pop.DR, aes(DR)) +
+   geom_boxplot() +
+   coord_flip() + 
+   annotate(geom = "table", label = list(DR_temq), y = 0.4, x = 0) +
+   theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
+options(scipen = 0)
+# scatterplot of population & DR
+pop.DR <- filter(pop.DR, state != "MP")
+ggplot(pop.DR, aes(population, DR)) +
+   geom_point() +
+   scale_x_continuous(name = "Population in millions (log10 scale)", trans = "log10", breaks = c(1e+06, 3e+06, 1e+07, 3e+07), labels = c("1", "3", "10", "30")) +
+   scale_y_continuous(name = "Death Rate (DR)", limits = c(0, 0.004)) +
+   geom_smooth(method = "loess", se = FALSE) +
+   geom_smooth(method = "lm", se = FALSE, color = "green") +
+   annotate("text", label = "As of 12/4/21", x = 3e+07, y = 0.004, size = 4, color = "grey60") +
    annotate("text", label = "(Excludes N. Mariana Is. / pop = 54k)", x = 2e+07, y = 0, size = 3, color = "grey60") +
    theme_classic()
 ```
